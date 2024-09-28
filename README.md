@@ -2,8 +2,9 @@
 ![workflow](https://github.com/GerbenAaltink/mrex/actions/workflows/make-mrex-single-platform.yml/badge.svg)
 
 ## Summary
-Super minimal regex validator.
-Contains 95% of common used regex syntax.
+This is a KISS/YAGNI regex validator. 
+Supports 95% of commonly used regex syntax.
+It is faster in matching than the original C `reg_exec`. Also including compilation (`reg_comp`).
 Original concept is from Rob Pike and mentioned in the book "Beautiful Code" written by Andy Oram and Greg Wilson.
 
 ## Supported functions
