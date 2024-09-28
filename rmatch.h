@@ -159,7 +159,6 @@ void example_one()
 
 void example_two()
 {
-    printf("Testing example two.\n");
     char *str = "testtest";
     char *expr = "t.*t";
     char *result = NULL;
@@ -175,9 +174,13 @@ void example_two()
 void rmatch_tests()
 {
     // Examples
+    printf("Testing example one.\n");
     example_one();
+    printf("Testing example two.\n");
     example_two();
-    // Asterisk
+    printf("Testing extracting.\n");
+    // Star
+    printf("Testing star.\n");
     rmatch_test(".*H.*ry P.*rS.*la", "Harry PotterSim       SalaHarry PotterSimSalaHarry PotterSimSalaHarry PotterSimSala",
                 (char *[]){
                     "Harry PotterSim       Sala",
@@ -190,9 +193,11 @@ void rmatch_tests()
     char *text_fox2 = "The quick brown fox jumps over the lazy dog.The quick brown fox jumps over the lazy dog.The quick brown fox jumps over the lazy dog.The quick brown fox jumps over the lazy dog.The quick brown fox jumps over the lazy dog.";
     rmatch_test("T.*e q.*k b.*n f.*x j.*s o.*r t.*e l.*y d.*g.", text_fox2, (char *[]){"The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog.", "The quick brown fox jumps over the lazy dog.", NULL});
     // Block
+    printf("Testing block.\n");
     char *text_fox3 = "The quick brown fox jumps over the lazy dog.";
     rmatch_test("T.*e q.*k b.*n f.*x j.*s o.*r t.*e l[oa][az].*y d[ao]g.", text_fox3, (char *[]){"The quick brown fox jumps over the lazy dog.", NULL});
     /// Plus
+    printf("Testing plus.\n");
     char *text_fox4 = "The quick brown fooox jumps over the lazy dog.";
     rmatch_test("T.*e q.*k b.*n fo+x j.*s o.*r t.*e l[oa][az].*y d[ao]g.", text_fox4, (char *[]){"The quick brown fooox jumps over the lazy dog.", NULL});
     rmatch_test("T.*e q.*k b.*n f.+x j.*s o.*r t.*e l[oa][az].*y d[ao]g.", text_fox4, (char *[]){"The quick brown fooox jumps over the lazy dog.", NULL});
