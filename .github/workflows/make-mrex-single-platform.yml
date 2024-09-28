@@ -1,11 +1,11 @@
-name: Build and run rrex4
+name: Build and run mrex
 
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 env:
   BUILD_TYPE: Release
