@@ -5,6 +5,7 @@
 This is a KISS/YAGNI regex validator. 
 Supports 95% of commonly used regex syntax.
  - It is faster in matching than the original C `reg_exec`. Also excluding compilation (`reg_comp`).
+ - Extracts contents.
  - Original concept is from Rob Pike and mentioned in the book "Beautiful Code" written by Andy Oram and Greg Wilson.
 
 ## Supported functions
@@ -16,7 +17,7 @@ Support for:
  - "*". Match must contain zero or more of previous character. Greedy.
  - "[abc]". Match one of these chars. Does NOT work in combination with greedy matching (`*+`).
 
-## Minimal usage matching
+## Usage matching
 `rmatch(char * expr, char ** str)` is the main function. It returns int[3].
 If you have a `char *` as str argument, don't forget to add the `&`.
 The return value contains:
@@ -26,7 +27,7 @@ result[1] // match start.
 result[2] // match length.
 ```
 
-## Minimal usage extracting
+## Usage extracting
 `rmatch_extract(char * expr, char * str)` is the main function. It returns char * or NULL.
 If you have a `char *` as str argument, don't forget to add the `&`.
 You can use it in a loop since it uses the pointer of the input string:
