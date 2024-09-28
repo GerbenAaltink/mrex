@@ -4,14 +4,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-int rmatchhere(char *regexp, char *text);
-int rmatchgreedy(int c, char *regexp, char *text, int required);
+inline static int rmatchhere(char *regexp, char *text);
+inline static int rmatchgreedy(int c, char *regexp, char *text, int required);
 unsigned int *rmatch(char *regexp, char **txt)
 {
     char *text = *txt;
     static unsigned int result[3];
-    result[0] = 0;
-    //memset(result, 0, sizeof(result));
+    //result[0] = 0;
+    memset(result, 0, sizeof(result));
     if (!*text)
         return result;
     if (regexp[0] == '^')
@@ -40,7 +40,7 @@ unsigned int *rmatch(char *regexp, char **txt)
     } while (*text++ != '\0');
     return result;
 }
-int rmatchhere(char *regexp, char *text)
+static inline int rmatchhere(char *regexp, char *text)
 {
     unsigned int res = 0;
     if (regexp[0] == '\0')
@@ -62,7 +62,9 @@ int rmatchhere(char *regexp, char *text)
             regexp++;
         } while((*regexp != ']'));
         if (block_true)
-            return rmatchhere(regexp +1 , text + 1) + 1;
+            if((res = rmatchhere(regexp +1 , text + 1)))
+                return res + 1;
+        return 0;
     }
     if (regexp[0] == '$' && regexp[1] == '\0')
         return *text == '\0';
@@ -73,7 +75,7 @@ int rmatchhere(char *regexp, char *text)
             return res + 1;
     return 0;
 }
-int rmatchgreedy(int c, char *regexp, char *text, int required)
+inline static int rmatchgreedy(int c, char *regexp, char *text, int required)
 {
     int rmatch_success = 0;
     int res = 0;
@@ -90,7 +92,7 @@ int rmatchgreedy(int c, char *regexp, char *text, int required)
     } while (*text != '\0' && ((*text++ == c) || c == '.'));
     return 0;
 }
-char *rmatch_extract(char *regexp, char **txt)
+inline char *rmatch_extract(char *regexp, char **txt)
 {
     unsigned int *result = rmatch(regexp, txt);
     if (result[0])
