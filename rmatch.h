@@ -55,14 +55,14 @@ int rmatchhere(char *regexp, char *text)
     {
         regexp++;
         int block_true = 0;
-        while (*regexp != ']')
+        do 
         {
             if (!block_true && *regexp == *text)
                 block_true++;
             regexp++;
-        }
+        } while((*regexp != ']'));
         if (block_true)
-            return rmatchhere(regexp + 1, text + 1) + 1;
+            return rmatchhere(regexp +1 , text + 1) + 1;
     }
     if (regexp[0] == '$' && regexp[1] == '\0')
         return *text == '\0';
