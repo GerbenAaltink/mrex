@@ -25,7 +25,6 @@ int *rmatch(char *regexp, char **txt)
         return result;
     }
     int steps_total = -1;
-    int steps_false = 0;
     do
     {
         steps_total++;
@@ -37,10 +36,6 @@ int *rmatch(char *regexp, char **txt)
             // printf("%d : %d %d\n", steps_total, steps_false, result[2]);
             *txt += result[1] + result[2];
             return result;
-        }
-        else
-        {
-            steps_false++;
         }
     } while (*text++ != '\0');
     return result;

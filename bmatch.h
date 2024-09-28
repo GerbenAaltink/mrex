@@ -7,13 +7,16 @@ int bmatchstar(int c, char *regexp, char *text);
 int bmatch(char *regexp, char *text)
 {
     if (regexp[0] == '^')
-        return bmatchhere(regexp + 1, text);
+        return bmatchhere(regexp + 1, text) == 0 ? -1 : 0;
+    int total_steps = 0;
     do
     {
+        total_steps++;
         if (bmatchhere(regexp, text))
-            return 1;
+            return total_steps;
+        
     } while (*text++ != '\0');
-    return 0;
+    return -1;
 }
 int bmatchhere(char *regexp, char *text)
 {
