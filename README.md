@@ -1,19 +1,19 @@
-![workflow](https://github.com/GerbenAaltink/mrex/actions/workflows/make-mrex-single-platform.yml/badge.svg)
-
 # Rmatch
+![workflow](https://github.com/GerbenAaltink/mrex/actions/workflows/make-mrex-single-platform.yml/badge.svg)
 
 ## Summary
 Super minimal regex validator.
-
+Contains 95% of common used regex syntax.
+Original concept is from Rob Pike and mentioned in the book "Beautiful Code" written by Andy Oram and Greg Wilson.
 
 ## Supported functions
 Support for:
- - extract matched data
- - . Does work in combination with greedy matching
- - ^
- - \+ greedy
- - \* greedy
- - [abc] (or). Does NOT work in combination with greedy matching
+ - Extracting matched data.
+ - ".". Match anything. Does work in combination with greedy matching.
+ - "^". Match must start at beginning.
+ - "+". Match must contain one or more of previous character. Greedy.
+ - "*". Match must contain zero or more of previous character. Greedy.
+ - "[abc]". Match one of these chars. Does NOT work in combination with greedy matching (`*+`).
 
 ## Minimal usage matching
 `rmatch(char * expr, char ** str)` is the main function. It returns int[3].
