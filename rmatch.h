@@ -1,3 +1,5 @@
+#ifndef RMATCH_H
+#define RMATCH_H
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -205,3 +207,4 @@ void rmatch_tests()
     rmatch_test("T.*e q.*k b.*n fo+x j.*s o.*r t.*e l[oa][az].*y d[ao]g.", text_fox4, (char *[]){"The quick brown fooox jumps over the lazy dog.", NULL});
     rmatch_test("T.*e q.*k b.*n f+x j.*s o.*r t.*e l[oa][az].*y d[ao]g.", text_fox4, (char *[]){NULL});
 }
+#endif
