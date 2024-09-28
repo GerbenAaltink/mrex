@@ -6,11 +6,12 @@
 #include <assert.h>
 int rmatchhere(char *regexp, char *text);
 int rmatchgreedy(int c, char *regexp, char *text, int required);
-int *rmatch(char *regexp, char **txt)
+unsigned int *rmatch(char *regexp, char **txt)
 {
     char *text = *txt;
-    static int result[3];
-    memset(result, 0, sizeof(result));
+    static unsigned int result[3];
+    result[0] = 0;
+    //memset(result, 0, sizeof(result));
     if (!*text)
         return result;
     if (regexp[0] == '^')
@@ -24,25 +25,24 @@ int *rmatch(char *regexp, char **txt)
         }
         return result;
     }
-    int steps_total = -1;
+    unsigned int steps_total = -1;
     do
     {
         steps_total++;
-        if ((result[2] = rmatchhere(regexp, text)))
-        {
-            result[2]--;
-            result[0] = result[2] > 0;
-            result[1] = steps_total;
-            // printf("%d : %d %d\n", steps_total, steps_false, result[2]);
-            *txt += result[1] + result[2];
-            return result;
-        }
+        if (!(result[2] = rmatchhere(regexp, text)))
+            continue;
+        result[2]--;
+        result[0] = result[2] > 0;
+        result[1] = steps_total;
+        *txt += result[1] + result[2];
+        return result;
+    
     } while (*text++ != '\0');
     return result;
 }
 int rmatchhere(char *regexp, char *text)
 {
-    int res = 0;
+    unsigned int res = 0;
     if (regexp[0] == '\0')
         return 1;
     if (regexp[1] == '*')
@@ -58,12 +58,11 @@ int rmatchhere(char *regexp, char *text)
         while (*regexp != ']')
         {
             if (!block_true && *regexp == *text)
-                block_true = 1;
+                block_true++;
             regexp++;
         }
         if (block_true)
             return rmatchhere(regexp + 1, text + 1) + 1;
-        return 0;
     }
     if (regexp[0] == '$' && regexp[1] == '\0')
         return *text == '\0';
@@ -76,34 +75,28 @@ int rmatchhere(char *regexp, char *text)
 }
 int rmatchgreedy(int c, char *regexp, char *text, int required)
 {
-    int rmatch_success = -1;
+    int rmatch_success = 0;
     int res = 0;
     do
     {
         rmatch_success++;
-        if ((res = rmatchhere(regexp, text)))
-        {
-            res = rmatch_success + res;
-            if (!required)
-            {
-                return res + 1;
-            }
-            else if (required && res > 1)
-            {
-                return res + 1;
-            }
-        }
+        if (!(res = rmatchhere(regexp, text)))
+             continue;
+        res = rmatch_success + res;
+        if (!required)
+            return res;
+        else if (required && res > 1)
+            return res;
     } while (*text != '\0' && ((*text++ == c) || c == '.'));
     return 0;
 }
 char *rmatch_extract(char *regexp, char **txt)
 {
-    int *result = rmatch(regexp, txt);
+    unsigned int *result = rmatch(regexp, txt);
     if (result[0])
     {
         char *extracted = *txt - result[2];
         char *str = (char *)malloc(result[2] + 1);
-        str[0] = 0;
         strncpy(str, extracted, result[2]);
         str[result[2]] = 0;
         return str;
@@ -193,6 +186,7 @@ void rmatch_tests()
     printf("Testing block.\n");
     char *text_fox3 = "The quick brown fox jumps over the lazy dog.";
     rmatch_test("T.*e q.*k b.*n f.*x j.*s o.*r t.*e l[oa][az].*y d[ao]g.", text_fox3, (char *[]){"The quick brown fox jumps over the lazy dog.", NULL});
+    rmatch_test("T.*e q.*k b.*n f.*x j.*s o.*r t.*e.*l.*[obcdefghia][zabcdefg].*y d[ao]g.", text_fox3, (char *[]){"The quick brown fox jumps over the lazy dog.", NULL});
     /// Plus
     printf("Testing plus.\n");
     char *text_fox4 = "The quick brown fooox jumps over the lazy dog.";
