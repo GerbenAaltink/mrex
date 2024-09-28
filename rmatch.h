@@ -146,7 +146,6 @@ void rmatch_test(char *expr, char *text, char **expected)
     assert(!expected[expected_index]);
 }
 
-#example_one
 void example_one()
 {
     char *str = "testtest";
@@ -158,7 +157,6 @@ void example_one()
     assert(!rmatch_extract(expr, &str));
 }
 
-#example_two
 void example_two()
 {
     printf("Testing example two.\n");
@@ -174,7 +172,6 @@ void example_two()
     assert(!result);
 }
 
-#tests
 void rmatch_tests()
 {
     // Examples
