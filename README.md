@@ -55,4 +55,4 @@ assert(!result);
 
 ## Tests / examples
 For executing tests in this repository, just run `make`.
-You find test source [here](rmatch.c#tests).
+You find test source [here](rmatch.h#L174).
