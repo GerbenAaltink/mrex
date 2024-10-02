@@ -354,7 +354,7 @@ void rmatch_test(char *expr, char *text, char **expected)
     assert(!expected[expected_index]);
 }
 
-void example_one()
+void rmatch_example_one()
 {
     char *str = "testtest";
     char *expr = "t.*t";
@@ -365,7 +365,7 @@ void example_one()
     assert(!rmatch_extract(expr, &str));
 }
 
-void example_two()
+void rmatch_example_two()
 {
     char *str = "testtest";
     char *expr = "t.*t";
@@ -396,7 +396,7 @@ void rmatch_tests_slash(){
     assert(result->length == 4);
     assert(result->start == 0);
     assert(result->position == 4);
-    
+
     // Test with optimizer
     rmatch_optimize = 1;
     text_ptr = text;
@@ -444,9 +444,9 @@ void rmatch_tests()
 {
     // Examples
     printf("Testing example one.\n");
-    example_one();
+    rmatch_example_one();
     printf("Testing example two.\n");
-    example_two();
+    rmatch_example_two();
     printf("Testing extracting.\n");
     // Star
     printf("Testing star.\n");
