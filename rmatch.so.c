@@ -7,7 +7,7 @@
 * Returns offset if found
 */
 extern int matchr(char * expr, char * str){
-	rmatch_t *result = rmatch(expr,str);
+	rmatch_t *result = rmatch(expr,&str);
 	return result->valid ? result->start : -1;
 }
 /*
@@ -16,5 +16,5 @@ extern int matchr(char * expr, char * str){
 * Returns offset if found
 */
 extern int matchb(char * expr, char * str){
-	return rbmatch(expr,str);
+	return bmatch(expr,str);
 }

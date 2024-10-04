@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <assert.h>
 int bmatchhere(char *regexp, char *text);
-inline int bmatchstar(int c, char *regexp, char *text);
-inline int bmatch(char *regexp, char *text)
+ int bmatchstar(int c, char *regexp, char *text);
+ int bmatch(char *regexp, char *text)
 {
     if (regexp[0] == '^')
         return bmatchhere(regexp + 1, text) == 0 ? -1 : 0;
@@ -31,7 +31,8 @@ int bmatchhere(char *regexp, char *text)
         return bmatchhere(regexp + 1, text + 1);
     return 0;
 }
-inline int bmatchstar(int c, char *regexp, char *text)
+
+ int bmatchstar(int c, char *regexp, char *text)
 {
     do
     {

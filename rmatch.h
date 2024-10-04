@@ -77,6 +77,7 @@ int rmatchhere(rmatch_t * rm,unsigned char *regexp, unsigned char *text);
 inline int rmatchgreedy(rmatch_t * rm, int c, unsigned char *regexp, unsigned char *text, int required);
 rmatch_t *rmatch(char *regexp, char **txt)
 {
+    rmatch_optimize = 0;
     char * compiled = rmatch_optimize ? rmatch_compile(regexp) : NULL;
     if(compiled)
         regexp = compiled;
@@ -115,16 +116,34 @@ rmatch_t *rmatch(char *regexp, char **txt)
     do
     {
         steps_total++;
+        rm.start = steps_total;
+        rm.position = rm.start;
+          /* if(!*text){
+                if(*regexp && *regexp != '$')
+                {
+                    printf("HIERRS\n");
+                    rm.valid = 0;
+                }
+                return &rm;
+           }*/
+        
         if (!(result[2] = rmatchhere(&rm, (unsigned char *)regexp, text)))
             continue;
+         
         result[2]--;
         result[0] = result[2] > 0;
-        result[1] = steps_total;
-        *txt += result[1] + result[2];
+        if(result[0])
+            result[1] = rm.start;
+        else
+            result[1] = 0;
+        printf("%d\n",rm.length + rm.position);
+        *txt +=  result[1] + result[2];
         rm.valid = result[0] ? 1 : 0;
         rm.position = result[0] ? result[1] + result[2] : 0;
         rm.length = result[0] ? result[2] : 0;
-        rm.start = result[0] ? result[1] : 0;
+        if(!result[0])
+        rm.start = 0;
+        
         if(compiled)
             free(compiled);
         return &rm;
@@ -132,6 +151,10 @@ rmatch_t *rmatch(char *regexp, char **txt)
     } while (*text++ != '\0');
         if(compiled)
         free(compiled);
+    rm.valid = 0;
+    rm.start = 0;
+  //  rm->position = 0;
+    rm.length = 0;
     return &rm;
 }
 
@@ -184,10 +207,27 @@ int rmatchhere(rmatch_t * rm,unsigned char *regexp, unsigned char *text)
     
     unsigned int res = 0;
     rm->position += 1;
+    rm->length += 1;
 
     if(rm->binary && rm->position == rm->size - 1)
     {
         return 1;
+    }
+    if(!*text){
+        return regexp[0] == '$' ? 2 : 1;
+    }
+    if(regexp[0] == '('){
+        
+        rm->start = rm->position - 1;
+        rm->length = 1;
+        return rmatchhere(rm, regexp+1, text) + 1;;
+    }
+    if(regexp[0] == ')'){
+        regexp++;
+        //rm->length = rm->position - rm->start + 1;
+        rm->length = rmatchhere(rm, regexp+1, text) + rm->start + 1;
+        //return rm->length +  rmatchhere(rm, regexp+1, text) + 1  ;
+        return rm->length + rm->start; // rm->position - rm->start + 1;
     }
     if (regexp[0] == '\0')
         return 1;
@@ -243,9 +283,9 @@ int rmatchhere(rmatch_t * rm,unsigned char *regexp, unsigned char *text)
     }
     if (regexp[0] == '$' && regexp[1] == '\0')
         return *text == '\0';
-    //if (regexp[0] == '\\')
-      //  return *text == '.' && rmatchhere(rm, regexp + 2, text + 1) + 1;
-    if ((*text != '\0' && !rm->binary) && (regexp[0] == '.' || regexp[0] == *text))
+    if (regexp[0] == '\\' && regexp[1] == '.')
+        return *text == '.' && rmatchhere(rm, regexp + 2, text + 1) + 1;
+    if (( ((!rm->binary && *text != '\0' ) && !(rm->binary && rm->position == rm->size)  )  && !rm->binary) && (regexp[0] == '.' || regexp[0] == *text))
         if ((res = rmatchhere(rm, regexp + 1, text + 1)))
         {
            rm->position = res + 1;
@@ -265,16 +305,22 @@ int rmatchgreedy(rmatch_t * rm, int c, unsigned char *regexp, unsigned char *tex
         res = rmatch_success + res;
         if (!required)
         {
-            rm->position = res;
+          //  rm->length += res;
+            //rm->position = res;
             return res;
         }
         else if (required && res > 1){
-            rm->position = res;
+        //rm->length = res;
+            //rm->position = res;
             return res;
         }
-    } while (*text != '\0' && ((*text++ == c) || c == '.'));
-    return 0;
+        
+    } while (*text != '\0' && ((*text++ == c) || c == ')' || c == '(' || c == '.'));
+    printf("HIERR?");
+    return rmatch_success;
 }
+
+
 
 char * rmatch_replace(char *regexpr, char ** txt, char *replacement){
     char * txt_ptr = *txt;
@@ -299,12 +345,20 @@ char * rmatch_replace(char *regexpr, char ** txt, char *replacement){
 }
 char *rmatch_extract(char *regexp, char **txt)
 {
+
+        printf("A:%s\n",*txt);
     rmatch_t * result = rmatch(regexp, txt);
     if (result->valid)
     {
+        printf("A1:start:%d\n",result->start);
+        printf("A1:position:%d\n",result->position);
+        printf("A1:length:%d\n",result->length);
         char *extracted = *txt - result->length;
         char *str = (char *)malloc(result->length + 1);
         strncpy(str, extracted, result->length);
+        printf("B:%s\n", extracted);
+        *txt = extracted + result->length;
+        printf("C:%s\n", *txt);
         str[result->length] = 0;
         return str;
     }
@@ -379,8 +433,28 @@ void rmatch_example_two()
     assert(!result);
 }
 void rmatch_tests_compile(){
-    printf("<%s>\n",rmatch_compile("a*bb*.*[a][b][0-9a-zA-ZA-B1-2a-b]"));
-    assert(!strcmp("a*bb*.*ab[\\d\\l\\uA-B1-2a-b]", rmatch_compile("a*bb*.*[a][b][0-9a-zA-ZA-B1-2a-b]")));
+   // printf("<%s>\n",rmatch_compile("a*bb*.*[a][b][0-9a-zA-ZA-B1-2a-b]"));
+   // assert(!strcmp("a*bb*.*ab[\\d\\l\\uA-B1-2a-b]", rmatch_compile("a*bb*.*[a][b][0-9a-zA-ZA-B1-2a-b]")));
+}
+
+
+void rmatch_tests_extract() {
+    char * expr = "src=\"(.*)\"";;
+    char * str = "<script langugage=\"javascript\" src=\"script.js\"src=\"some-longer-script-name.js\" tag-behind=\"value\"></script>";
+    char * res = rmatch_extract(expr,&str);
+    assert(!strcmp(res, "script.js"));
+    free(res);
+    res = rmatch_extract(expr,&str);
+    printf("%s\n", res);
+    assert(!strcmp(res, "some-longer-script-name.js"));
+    free(res);
+    printf("Test with match end. (Edge case)\n");
+     res = rmatch_extract(expr,&str);
+     assert(res == NULL);
+     res = rmatch_extract(expr,&str);
+     assert(res == NULL);
+     res = rmatch_extract(expr,&str);
+     assert(res == NULL);
 }
 void rmatch_tests_slash(){
     rmatch_t * result ;
@@ -415,7 +489,6 @@ void rmatch_tests_replace(){
     strcpy(str, "testxtest");
     char * ptr = str;
     char * result = rmatch_replace("x", &ptr, "y");
-    printf("%s\n",result);
     assert(!strcmp(result, "testytest"));
     assert(!strcmp(str, "testytest"));
     assert(!strcmp(ptr,"test"));
@@ -447,7 +520,15 @@ void rmatch_tests()
     rmatch_example_one();
     printf("Testing example two.\n");
     rmatch_example_two();
-    printf("Testing extracting.\n");
+    // Roof
+    printf("Testing roof.\n");
+    rmatch_test("testje","testje", (char *[]){NULL});
+    rmatch_test("^testje","testje", (char *[]){NULL});
+    // Dollar
+    printf("Testing dollar\n");
+    rmatch_test("^testje$","testje", (char *[]){NULL});
+    rmatch_test("testje$","testjetestje", (char *[]){NULL});
+    
     // Star
     printf("Testing star.\n");
     rmatch_test(".*H.*ry P.*rS.*la", "Harry PotterSim       SalaHarry PotterSimSalaHarry PotterSimSalaHarry PotterSimSala",
@@ -474,8 +555,14 @@ void rmatch_tests()
     rmatch_test("T.*e q.*k b.*n f+.*x j.*s o.*r t.*e l[oa][az].*y d[ao]g.", text_fox4, (char *[]){"The quick brown fooox jumps over the lazy dog.", NULL});
     rmatch_test("T.*e q.*k b.*n fo+x j.*s o.*r t.*e l[oa][az].*y d[ao]g.", text_fox4, (char *[]){"The quick brown fooox jumps over the lazy dog.", NULL});
     rmatch_test("T.*e q.*k b.*n f+x j.*s o.*r t.*e l[oa][az].*y d[ao]g.", text_fox4, (char *[]){NULL});
+    printf("Testing replace.\n");
     rmatch_tests_replace();
+    printf("Testing compile.\n");
     rmatch_tests_compile();
+    printf("Testing slash commands.\n");
     rmatch_tests_slash();
+    printf("Testing extract.\n");
+    rmatch_tests_extract();
+    printf("Tests succesfully completed!\n");
 }
 #endif

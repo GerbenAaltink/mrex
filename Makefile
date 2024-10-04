@@ -1,8 +1,10 @@
-all: rmatch run
+all: build_rmatch run build_rmatch_so
 
-rmatch: rmatch.c rmatch.h rmatch.so.c
-	gcc rmatch.c -Wall -Wextra -Ofast -o rmatch
-	gcc rmatch.so.c -fPIC -shared -o librmatch.so -Ofast
+build_rmatch: 
+	gcc rmatch.c -Wall -Wextra -Ofast -o rmatch -Werror
+build_rmatch_so:
+	gcc rmatch.so.c -fPIC -shared -o librmatch.so -Ofast -Werror
+
 
 run:
 	./rmatch
